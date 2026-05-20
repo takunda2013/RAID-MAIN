@@ -1,0 +1,14 @@
+So this is what is currently happening. I have trained my Roberta Large and created
+a feature calculator and a concatenation engine. these produce datasets which l used to train my XGBoost model 
+
+The goal it to classify between Human and AI(AI Original or Paraphrased AI) student essays, so the model
+is good at doing that. What concerns me now is the confidence score or prob_ai, prob_human, always remains 99%.
+
+Even though when l use data which is not duplicated for training and validating or testing the XGBoost model
+I still get the same results, high prob scores. 
+
+I need the model to be able to tell reasonable probabilities, so that l can use my LIME
+Auditor to audit the model and highlight specific text causing the issue. 
+
+Help me get down to the root cause of this issu. Write a readme.md file in the XGBoost Classifier directory of the problem 
+and your recommendation. Think of this as Planning.

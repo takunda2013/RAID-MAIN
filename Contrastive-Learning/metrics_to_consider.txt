@@ -1,0 +1,86 @@
+Great question. Here are the metrics that would make a strong research contribution for your specific task:
+
+---
+
+**Core Detection Metrics**
+
+These are your primary results table:
+
+```
+Binary F1          → overall human vs AI detection
+Binary AUC-ROC     → threshold-independent detection quality
+Precision          → of essays flagged as AI, how many actually are
+Recall             → of all AI essays, how many were caught
+```
+
+---
+
+**Adversarial Robustness Metrics**
+These are your most novel contribution — no standard AI detector paper focuses here:
+
+```
+Label 2 recall           → paraphrased AI caught rate
+Detection gap            → label 1 recall - label 2 recall
+                           (measures how much paraphrasing hurts)
+Paraphraser robustness   → accuracy broken down per paraphrasing model
+                           (model A vs B vs C separately)
+```
+
+The detection gap is particularly powerful:
+```
+Naive classifier:    gap = 0.40  (badly fooled by paraphrasing)
+Your model:          gap = 0.08  (robust to paraphrasing)
+```
+That contrast tells the whole story of why contrastive learning helps.
+
+---
+
+**Embedding Quality Metrics**
+These validate the contrastive learning stage itself:
+
+```
+Linear probe AUC         → already in your script
+Silhouette score         → how well separated the 3 clusters are
+Intra-class distance     → how tight label 1 and 2 cluster together
+                           (validates pulling them together worked)
+Inter-class distance     → how far human vs AI clusters are
+t-SNE visualization      → qualitative but powerful for a paper figure
+```
+
+---
+
+**Comparison Baselines**
+Essential for a research paper — you need to show your model beats something:
+
+```
+GPTZero / Originality.ai     → commercial detectors
+Perplexity-based detector    → traditional statistical approach
+Fine-tuned RoBERTa           → same model WITHOUT contrastive learning
+                               (ablation — proves contrastive helps)
+```
+
+That last one is your **ablation study** — same architecture, same data, but trained with cross-entropy only. If your contrastive model beats it on label 2 recall, you've proven your contribution.
+
+---
+
+**Cross-Domain Generalization**
+If you have essays from different sources/domains:
+
+```
+In-domain F1      → essays similar to training data
+Out-of-domain F1  → essays from unseen domains/styles
+Generalization gap → difference between the two
+```
+
+---
+
+**The metrics that will make your paper stand out:**
+
+```
+1. Detection gap (label 1 vs label 2 recall)
+2. Per-paraphraser breakdown (model A, B, C separately)
+3. Ablation vs non-contrastive baseline
+4. t-SNE showing embedding clusters
+```
+
+Nobody else is measuring paraphraser-specific robustness — that's your unique angle. Want me to help write the evaluation code for any of these?

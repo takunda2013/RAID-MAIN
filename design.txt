@@ -1,0 +1,180 @@
+ER Diagram — UI database (AI Essay Detector)
+
+Purpose: Describe the SQLite schema used by the UI and provide a copy-paste AI prompt
+that generates a clear ER diagram image (PNG/SVG). Also include PlantUML and Mermaid
+snippets for programmatic rendering.
+
+Database summary (tables and columns):
+
+1) users
+   - id: INTEGER, PRIMARY KEY, AUTOINCREMENT
+   - email: TEXT, NOT NULL, UNIQUE
+   - display_name: TEXT, NOT NULL
+   - password_hash: TEXT, NOT NULL
+   - role: TEXT, NOT NULL (CHECK: 'educator' | 'super_admin')
+   - is_active: INTEGER, NOT NULL, DEFAULT 1 (0/1)
+   - created_at: TEXT, NOT NULL (ISO datetime)
+   - last_login_at: TEXT, NULL
+
+2) audit_log
+   - id: INTEGER, PRIMARY KEY, AUTOINCREMENT
+   - actor_user_id: INTEGER, NULL, FOREIGN KEY -> users.id
+   - action: TEXT, NOT NULL
+   - target_user_id: INTEGER, NULL, FOREIGN KEY -> users.id
+   - detail: TEXT, NULL
+   - created_at: TEXT, NOT NULL (ISO datetime)
+
+3) documents
+   - id: INTEGER, PRIMARY KEY, AUTOINCREMENT
+   - user_id: INTEGER, NOT NULL, FOREIGN KEY -> users.id ON DELETE CASCADE
+   - original_filename: TEXT, NOT NULL
+   - stored_path: TEXT, NOT NULL
+   - report_path: TEXT, NULL
+   - status: TEXT, NOT NULL (CHECK: 'uploaded' | 'processed')
+   - demo_scenario: TEXT, NOT NULL
+   - label: TEXT, NULL
+   - confidence: INTEGER, NULL
+   - ai_probability: INTEGER, NULL
+   - word_count: INTEGER, NOT NULL, DEFAULT 0
+   - uploaded_at: TEXT, NOT NULL
+   - processed_at: TEXT, NULL
+
+Relationships and cardinality:
+- `users` 1 — 0..* `documents` (via `documents.user_id`; ON DELETE CASCADE)
+- `users` 0..1 — 0..* `audit_log` as actor (`audit_log.actor_user_id` nullable)
+- `users` 0..1 — 0..* `audit_log` as target (`audit_log.target_user_id` nullable)
+
+Diagram guidance (how the ER should look):
+- Notation: Crow's-foot (preferred) or UML/entity-boxes with PK/FK markers.
+- Highlight primary keys (PK) and foreign keys (FK). Mark `users.email` as UNIQUE.
+- Display column types, NOT NULL markers, DEFAULT values, CHECK constraints, and
+  `ON DELETE CASCADE` on `documents.user_id`.
+- Layout suggestion: place `users` on the left (central), `documents` to the right,
+  and `audit_log` below `users`. Show two separate FK links from `audit_log` to `users`.
+- Add a small legend explaining PK, FK, CHECK constraints and cardinality notation.
+
+AI image-generation prompt (copy-paste):
+"""
+Create a high-resolution, professional ER diagram for an SQLite database used by a
+Streamlit app called 'AI Essay Detector'. Show three entities: `users`, `documents`,
+and `audit_log`. Use Crow's-foot notation and a clean modern visual style.
+
+Requirements:
+- Show each entity as a box listing columns. Mark primary keys with a gold key icon or
+  with the prefix `PK:`. Mark foreign keys with `FK:` and draw FK arrows to the referenced
+  PK. Show data types and important constraints inline (e.g. `NOT NULL`, `UNIQUE`,
+  `DEFAULT`, `CHECK`, `ON DELETE CASCADE`).
+- Fields to display exactly as follows:
+  users: id (PK, INTEGER), email (TEXT, UNIQUE, NOT NULL), display_name (TEXT, NOT NULL),
+    password_hash (TEXT, NOT NULL), role (TEXT, NOT NULL, CHECK in 'educator'|'super_admin'),
+    is_active (INTEGER, NOT NULL, DEFAULT 1), created_at (TEXT, NOT NULL), last_login_at (TEXT)
+  documents: id (PK, INTEGER), user_id (FK users.id, INTEGER, NOT NULL, ON DELETE CASCADE),
+    original_filename (TEXT, NOT NULL), stored_path (TEXT, NOT NULL), report_path (TEXT),
+    status (TEXT, NOT NULL, CHECK in 'uploaded'|'processed'), demo_scenario (TEXT, NOT NULL),
+    label (TEXT), confidence (INTEGER), ai_probability (INTEGER), word_count (INTEGER, DEFAULT 0),
+    uploaded_at (TEXT, NOT NULL), processed_at (TEXT)
+  audit_log: id (PK, INTEGER), actor_user_id (FK users.id, INTEGER), action (TEXT, NOT NULL),
+    target_user_id (FK users.id, INTEGER), detail (TEXT), created_at (TEXT, NOT NULL)
+
+- Show cardinality labels: `users 1` — `documents 0..*`; `users 0..1` — `audit_log 0..*` (for both
+  actor and target references). Add arrows or crow's-foot shapes to make multiplicity clear.
+- Colors & style: Users (teal/blue), Documents (amber/orange), Audit Log (gray). Use a readable
+  sans-serif font, consistent spacing, neat lines, and a small legend in the corner.
+- Output: high-resolution PNG or scalable SVG, horizontal layout (recommended size 2048×1152).
+"""
+
+Optional: compact prompt for smaller models or quick renders:
+"Create a clean Crow's-foot ER diagram (PNG) showing `users`, `documents`, and `audit_log`.
+Mark PKs, FKs, types, constraints; show `users->documents` (1-to-many) and `users->audit_log` (two
+FKs). Use teal/amber/gray color palette and include a legend. Output 1600×900." 
+
+PlantUML snippet (paste into PlantUML to generate):
+@startuml
+entity "users" as users {
+  * id : INTEGER <<PK>>
+  --
+  email : TEXT <<UNIQUE, NOT NULL>>
+  display_name : TEXT <<NOT NULL>>
+  password_hash : TEXT <<NOT NULL>>
+  role : TEXT <<CHECK('educator'|'super_admin')>>
+  is_active : INTEGER <<DEFAULT 1>>
+  created_at : TEXT <<NOT NULL>>
+  last_login_at : TEXT
+}
+
+entity "documents" as documents {
+  * id : INTEGER <<PK>>
+  --
+  user_id : INTEGER <<FK users.id, NOT NULL, ON DELETE CASCADE>>
+  original_filename : TEXT <<NOT NULL>>
+  stored_path : TEXT <<NOT NULL>>
+  report_path : TEXT
+  status : TEXT <<CHECK('uploaded'|'processed')>>
+  demo_scenario : TEXT <<NOT NULL>>
+  label : TEXT
+  confidence : INTEGER
+  ai_probability : INTEGER
+  word_count : INTEGER <<DEFAULT 0>>
+  uploaded_at : TEXT <<NOT NULL>>
+  processed_at : TEXT
+}
+
+entity "audit_log" as audit_log {
+  * id : INTEGER <<PK>>
+  --
+  actor_user_id : INTEGER <<FK users.id>>
+  action : TEXT <<NOT NULL>>
+  target_user_id : INTEGER <<FK users.id>>
+  detail : TEXT
+  created_at : TEXT <<NOT NULL>>
+}
+
+users ||--o{ documents : uploads
+users ||--o{ audit_log : actor
+users ||--o{ audit_log : target
+@enduml
+
+Mermaid (erDiagram) snippet:
+erDiagram
+  USERS {
+    INTEGER id PK
+    TEXT email UNIQUE
+    TEXT display_name
+    TEXT password_hash
+    TEXT role
+    INTEGER is_active
+    TEXT created_at
+    TEXT last_login_at
+  }
+  DOCUMENTS {
+    INTEGER id PK
+    INTEGER user_id FK
+    TEXT original_filename
+    TEXT stored_path
+    TEXT report_path
+    TEXT status
+    TEXT demo_scenario
+    TEXT label
+    INTEGER confidence
+    INTEGER ai_probability
+    INTEGER word_count
+    TEXT uploaded_at
+    TEXT processed_at
+  }
+  AUDIT_LOG {
+    INTEGER id PK
+    INTEGER actor_user_id FK
+    TEXT action
+    INTEGER target_user_id FK
+    TEXT detail
+    TEXT created_at
+  }
+
+  USERS ||--o{ DOCUMENTS : uploads
+  USERS ||--o{ AUDIT_LOG : actor
+  USERS ||--o{ AUDIT_LOG : target
+
+Notes:
+- Source schema is defined in `UI/db.py` (SQLite). Default DB path: `UI/data/app.db`.
+- If you want me to also render a PNG/SVG using PlantUML or Mermaid, say which format you
+  prefer and I can generate it programmatically.

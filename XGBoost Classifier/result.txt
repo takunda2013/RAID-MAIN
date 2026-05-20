@@ -1,0 +1,53 @@
+⚡ main ~/Robust-Ai-Detector/XGBoost Classifier python classify_single_essay.py --essay-file test_essay.txt --json
+2026-05-15 15:32:04,496 [INFO] Using device: cuda
+2026-05-15 15:32:04,496 [INFO] Extracting semantic embedding...
+2026-05-15 15:32:06,793 [INFO] HTTP Request: HEAD https://huggingface.co/roberta-large/resolve/main/config.json "HTTP/1.1 200 OK"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-05-15 15:32:06,793 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-05-15 15:32:06,820 [INFO] HTTP Request: HEAD https://huggingface.co/roberta-large/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+Loading weights: 100%|█████████████████████████████████████████████| 389/389 [00:00<00:00, 6350.03it/s]
+[transformers] RobertaModel LOAD REPORT from: roberta-large
+Key                       | Status     | 
+--------------------------+------------+-
+lm_head.dense.bias        | UNEXPECTED | 
+lm_head.layer_norm.bias   | UNEXPECTED | 
+lm_head.layer_norm.weight | UNEXPECTED | 
+lm_head.bias              | UNEXPECTED | 
+lm_head.dense.weight      | UNEXPECTED | 
+pooler.dense.bias         | MISSING    | 
+pooler.dense.weight       | MISSING    | 
+
+Notes:
+- UNEXPECTED:      can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:       those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+2026-05-15 15:32:08,982 [INFO] HTTP Request: HEAD https://huggingface.co/gpt2-large/resolve/main/config.json "HTTP/1.1 200 OK"
+Loading weights: 100%|█████████████████████████████████████████████| 436/436 [00:00<00:00, 6475.51it/s]
+2026-05-15 15:32:09,293 [INFO] HTTP Request: HEAD https://huggingface.co/gpt2-large/resolve/main/generation_config.json "HTTP/1.1 200 OK"
+2026-05-15 15:32:09,312 [INFO] HTTP Request: HEAD https://huggingface.co/gpt2-large/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-05-15 15:32:09,333 [INFO] HTTP Request: HEAD https://huggingface.co/gpt2-large/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-15 15:32:09,351 [INFO] HTTP Request: GET https://huggingface.co/api/models/gpt2-large/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-05-15 15:32:09,370 [INFO] HTTP Request: GET https://huggingface.co/api/models/openai-community/gpt2-large/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-15 15:32:09,390 [INFO] HTTP Request: GET https://huggingface.co/api/models/gpt2-large/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-05-15 15:32:09,414 [INFO] HTTP Request: GET https://huggingface.co/api/models/openai-community/gpt2-large/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+[transformers] `loss_type=None` was set in the config but it is unrecognized. Using the default loss: `ForCausalLMLoss`.
+{
+  "label_id": 0,
+  "label": "Human",
+  "threshold": 0.5,
+  "prob_ai": 0.0006644694367423654,
+  "prob_human": 0.9993355305632576,
+  "semantic_dim": 1024,
+  "statistical_dim": 10,
+  "statistical_features": {
+    "mean_surprisal": 3.260845461596219,
+    "stdev_surprisal": 2.614528813989868,
+    "var_surprisal": 6.835760919183265,
+    "skew_surprisal": 0.9929333637467074,
+    "kurtosis_surprisal": 0.598204588831893,
+    "mean_diff_surprisal": -0.014131043992472026,
+    "stdev_diff_surprisal": 3.584912552954234,
+    "var_second_diff_loglik": 38.04359817504883,
+    "entropy_second_diff_loglik": 2.63414213775077,
+    "autocorr_second_diff_loglik": -0.6590070088229173
+  }
+}

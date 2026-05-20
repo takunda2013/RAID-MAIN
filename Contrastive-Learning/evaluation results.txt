@@ -1,0 +1,144 @@
+⚡ main ~/Robust-Ai-Detector/Contrastive-Learning python evaluate_using_test.py             
+2026-05-08 15:28:18,285 [INFO] Device: cuda
+2026-05-08 15:28:22,645 [INFO] Probe train rows: 44414 from data/processed/full_train_pool.csv
+2026-05-08 15:28:22,645 [INFO] Eval rows: 6088 from data/test.csv
+2026-05-08 15:28:22,654 [INFO] Probe train label dist:
+label
+0    12892
+1     8945
+2    22577
+2026-05-08 15:28:22,656 [INFO] Eval label dist:
+generated
+0    1612
+1    1119
+2    3357
+2026-05-08 15:28:22,657 [INFO] Tokenizer loaded from HuggingFace: roberta-large
+2026-05-08 15:28:22,759 [INFO] HTTP Request: HEAD https://huggingface.co/roberta-large/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-08 15:28:22,794 [INFO] HTTP Request: GET https://huggingface.co/api/models/roberta-large/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-05-08 15:28:22,814 [INFO] HTTP Request: GET https://huggingface.co/api/models/FacebookAI/roberta-large/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-08 15:28:22,832 [INFO] HTTP Request: GET https://huggingface.co/api/models/roberta-large/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-05-08 15:28:22,870 [INFO] HTTP Request: GET https://huggingface.co/api/models/FacebookAI/roberta-large/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-08 15:28:23,761 [INFO] Checkpoint path: /teamspace/studios/this_studio/Robust-Ai-Detector/Contrastive-Learning/models/roberta_contrastive/checkpoint_epoch1.pt
+2026-05-08 15:28:23,761 [INFO] Checkpoint size: 4268.4 MB
+2026-05-08 15:29:35,463 [INFO] Loaded checkpoint wrapper: epoch=1 val_loss=2.7914436648836913
+2026-05-08 15:29:35,463 [INFO] Total model keys in checkpoint: 397
+2026-05-08 15:29:35,493 [INFO] HTTP Request: HEAD https://huggingface.co/roberta-large/resolve/main/config.json "HTTP/1.1 200 OK"
+2026-05-08 15:29:35,523 [INFO] HTTP Request: HEAD https://huggingface.co/roberta-large/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+Loading weights: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 389/389 [00:00<00:00, 1833.78it/s]
+[transformers] RobertaModel LOAD REPORT from: roberta-large
+Key                       | Status     | 
+--------------------------+------------+-
+lm_head.bias              | UNEXPECTED | 
+lm_head.layer_norm.bias   | UNEXPECTED | 
+lm_head.dense.bias        | UNEXPECTED | 
+lm_head.dense.weight      | UNEXPECTED | 
+lm_head.layer_norm.weight | UNEXPECTED | 
+pooler.dense.bias         | MISSING    | 
+pooler.dense.weight       | MISSING    | 
+
+Notes:
+- UNEXPECTED:      can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:       those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+2026-05-08 15:29:38,210 [INFO] Model loaded cleanly; all keys matched.
+2026-05-08 15:29:38,272 [INFO] Extracting probe-train embeddings...
+2026-05-08 15:29:40,085 [INFO]   Processed 0/44414 samples
+2026-05-08 15:31:47,383 [INFO]   Processed 1600/44414 samples
+2026-05-08 15:33:55,991 [INFO]   Processed 3200/44414 samples
+2026-05-08 15:36:04,699 [INFO]   Processed 4800/44414 samples
+2026-05-08 15:38:13,402 [INFO]   Processed 6400/44414 samples
+2026-05-08 15:40:22,087 [INFO]   Processed 8000/44414 samples
+2026-05-08 15:42:30,868 [INFO]   Processed 9600/44414 samples
+2026-05-08 15:44:39,638 [INFO]   Processed 11200/44414 samples
+2026-05-08 15:46:48,368 [INFO]   Processed 12800/44414 samples
+2026-05-08 15:48:57,321 [INFO]   Processed 14400/44414 samples
+- MISSING:       those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+2026-05-08 15:29:38,210 [INFO] Model loaded cleanly; all keys matched.
+2026-05-08 15:29:38,272 [INFO] Extracting probe-train embeddings...
+2026-05-08 15:29:40,085 [INFO]   Processed 0/44414 samples
+2026-05-08 15:31:47,383 [INFO]   Processed 1600/44414 samples
+2026-05-08 15:33:55,991 [INFO]   Processed 3200/44414 samples
+2026-05-08 15:36:04,699 [INFO]   Processed 4800/44414 samples
+2026-05-08 15:38:13,402 [INFO]   Processed 6400/44414 samples
+2026-05-08 15:40:22,087 [INFO]   Processed 8000/44414 samples
+2026-05-08 15:42:30,868 [INFO]   Processed 9600/44414 samples
+2026-05-08 15:44:39,638 [INFO]   Processed 11200/44414 samples
+2026-05-08 15:46:48,368 [INFO]   Processed 12800/44414 samples
+2026-05-08 15:48:57,321 [INFO]   Processed 14400/44414 samples
+ider training on your downstream task.
+2026-05-08 15:29:38,210 [INFO] Model loaded cleanly; all keys matched.
+2026-05-08 15:29:38,272 [INFO] Extracting probe-train embeddings...
+2026-05-08 15:29:40,085 [INFO]   Processed 0/44414 samples
+2026-05-08 15:31:47,383 [INFO]   Processed 1600/44414 samples
+2026-05-08 15:33:55,991 [INFO]   Processed 3200/44414 samples
+2026-05-08 15:36:04,699 [INFO]   Processed 4800/44414 samples
+2026-05-08 15:38:13,402 [INFO]   Processed 6400/44414 samples
+2026-05-08 15:40:22,087 [INFO]   Processed 8000/44414 samples
+2026-05-08 15:42:30,868 [INFO]   Processed 9600/44414 samples
+2026-05-08 15:44:39,638 [INFO]   Processed 11200/44414 samples
+2026-05-08 15:46:48,368 [INFO]   Processed 12800/44414 samples
+2026-05-08 15:48:57,321 [INFO]   Processed 14400/44414 samples
+- MISSING:       those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+2026-05-08 15:29:38,210 [INFO] Model loaded cleanly; all keys matched.
+2026-05-08 15:29:38,272 [INFO] Extracting probe-train embeddings...
+2026-05-08 15:29:40,085 [INFO]   Processed 0/44414 samples
+2026-05-08 15:31:47,383 [INFO]   Processed 1600/44414 samples
+2026-05-08 15:33:55,991 [INFO]   Processed 3200/44414 samples
+2026-05-08 15:36:04,699 [INFO]   Processed 4800/44414 samples
+2026-05-08 15:38:13,402 [INFO]   Processed 6400/44414 samples
+2026-05-08 15:40:22,087 [INFO]   Processed 8000/44414 samples
+2026-05-08 15:42:30,868 [INFO]   Processed 9600/44414 samples
+2026-05-08 15:44:39,638 [INFO]   Processed 11200/44414 samples
+2026-05-08 15:46:48,368 [INFO]   Processed 12800/44414 samples
+2026-05-08 15:48:57,321 [INFO]   Processed 14400/44414 samples
+2026-05-08 15:51:13,731 [INFO]   Processed 16000/44414 samples
+2026-05-08 15:55:46,531 [INFO]   Processed 17600/44414 samples
+2026-05-08 16:00:20,183 [INFO]   Processed 19200/44414 samples
+2026-05-08 16:04:53,234 [INFO]   Processed 20800/44414 samples
+2026-05-08 16:09:26,834 [INFO]   Processed 22400/44414 samples
+2026-05-08 16:14:01,763 [INFO]   Processed 24000/44414 samples
+2026-05-08 16:16:41,190 [INFO]   Processed 25600/44414 samples
+2026-05-08 16:20:48,018 [INFO]   Processed 27200/44414 samples
+2026-05-08 16:25:21,578 [INFO]   Processed 28800/44414 samples
+2026-05-08 16:29:56,186 [INFO]   Processed 30400/44414 samples
+2026-05-08 16:34:31,080 [INFO]   Processed 32000/44414 samples
+2026-05-08 16:39:07,458 [INFO]   Processed 33600/44414 samples
+2026-05-08 16:43:42,986 [INFO]   Processed 35200/44414 samples
+2026-05-08 16:48:16,891 [INFO]   Processed 36800/44414 samples
+2026-05-08 16:52:50,899 [INFO]   Processed 38400/44414 samples
+2026-05-08 16:57:25,217 [INFO]   Processed 40000/44414 samples
+2026-05-08 17:01:59,942 [INFO]   Processed 41600/44414 samples
+2026-05-08 17:06:35,396 [INFO]   Processed 43200/44414 samples
+2026-05-08 17:10:02,607 [INFO] Extracting held-out eval embeddings...
+2026-05-08 17:10:05,370 [INFO]   Processed 0/6088 samples
+2026-05-08 17:14:39,233 [INFO]   Processed 1600/6088 samples
+2026-05-08 17:18:06,582 [INFO]   Processed 3200/6088 samples
+2026-05-08 17:20:18,531 [INFO]   Processed 4800/6088 samples
+2026-05-08 17:22:02,566 [INFO] Probe train label counts: human=12892 original_ai=8945 paraphrased_ai=22577 total_ai=31522
+2026-05-08 17:22:02,566 [INFO] Held-out eval label counts: human=1612 original_ai=1119 paraphrased_ai=3357 total_ai=4476
+2026-05-08 17:22:02,566 [INFO] Train embedding shape: (44414, 1024)
+2026-05-08 17:22:02,566 [INFO] Eval embedding shape: (6088, 1024)
+
+================================================================
+HELD-OUT EVALUATION
+================================================================
+Probe trained on : data/processed/full_train_pool.csv (44414 rows)
+Evaluated on     : data/test.csv (6088 rows)
+
+Binary report (0=Human, 1=AI):
+              precision    recall  f1-score   support
+
+       Human     0.9988    0.9988    0.9988      1612
+          AI     0.9996    0.9996    0.9996      4476
+
+    accuracy                         0.9993      6088
+   macro avg     0.9992    0.9992    0.9992      6088
+weighted avg     0.9993    0.9993    0.9993      6088
+
+AUC: 1.0000
+Confusion matrix [[TN, FP], [FN, TP]]:
+[[1610    2]
+ [   2 4474]]
+Original AI    detection recall: 0.9982 (1119 rows)
+Paraphrased AI detection recall: 1.0000 (3357 rows)
+================================================================
+Note: this is now a held-out probe evaluation, not a 70/30 split of the test file.

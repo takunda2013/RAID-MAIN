@@ -1,0 +1,10 @@
+# Model-based DivEye features
+numpy
+scipy
+torch
+transformers
+pandas
+tqdm
+xgboost
+scikit-learn
+

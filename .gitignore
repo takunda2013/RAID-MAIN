@@ -1,0 +1,48 @@
+# Environments
+myenv/
+.venv
+env/
+venv/
+ENV/
+.env
+.env.local
+.env.development.local 
+
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+__pycache__/
+*.pyc   
+# OS
+.DS_Store
+Thumbs.db
+
+# Rubish
+.cursor-server
+.vscode-server
+.wget-hsts
+.windsurf-server
+.codeium
+.codex
+.copilot
+.lightning_studio
+.streamlit
+.vscode-remote-containers
+
+# Databases
+*.sqlite
+*.db
+*.sql
+data/
+models/
+train_xgboost_binary.py
+train_xgboost_binary-copy.py
+datasets/
+outputs/
+probability_audit_fixes/

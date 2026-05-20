@@ -1,0 +1,7 @@
+So when l train my XGBoost with any dataset be it one with 44000+ essays
+or 6000+ essays different datasets; using concatenated 1032 (semantic + statistical vectors) the
+model gets an accuracy of 99% after testing with unseen data.
+
+then when l start test it with other essays any unseen essay it gives the correct label and a very high confidence like 99% as well.
+
+even when l test with human essay

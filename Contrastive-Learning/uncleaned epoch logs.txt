@@ -1,0 +1,158 @@
+Epoch 1/5
+=======================================================
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+2026-05-07 09:54:37,726 [INFO]   Epoch 1 | batch 0/2775 | opt_step ~0 | loss=2.9808 | lr=0.00e+00
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+Contrastive mode : label
+2026-05-07 09:54:28,843 [INFO] Total steps      : 6935 | Warmup: 416
+2026-05-07 09:54:28,843 [INFO]
+=======================================================
+Epoch 1/5
+=======================================================
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+2026-05-07 09:54:37,726 [INFO]   Epoch 1 | batch 0/2775 | opt_step ~0 | loss=2.9808 | lr=0.00e+00
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+h gradient checkpointing. Setting `use_cache=False`.
+2026-05-07 09:54:37,726 [INFO]   Epoch 1 | batch 0/2775 | opt_step ~0 | loss=2.9808 | lr=0.00e+00
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+2026-05-07 10:29:45,573 [INFO]   Epoch 1 | batch 250/2775 | opt_step ~125 | loss=2.6103 | lr=6.01e-06
+2026-05-07 09:54:28,843 [INFO] Total steps      : 6935 | Warmup: 416
+2026-05-07 09:54:28,843 [INFO]
+=======================================================
+Epoch 1/5
+=======================================================
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+2026-05-07 09:54:37,726 [INFO]   Epoch 1 | batch 0/2775 | opt_step ~0 | loss=2.9808 | lr=0.00e+00
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+2026-05-07 10:29:45,573 [INFO]   Epoch 1 | batch 250/2775 | opt_step ~125 | loss=2.6103 | lr=6.01e-06
+2026-05-07 09:54:28,843 [INFO] Total steps      : 6935 | Warmup: 416
+2026-05-07 09:54:28,843 [INFO]
+=======================================================
+Epoch 1/5
+=======================================================
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+2026-05-07 09:54:37,726 [INFO]   Epoch 1 | batch 0/2775 | opt_step ~0 | loss=2.9808 | lr=0.00e+00
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+2026-05-07 10:29:45,573 [INFO]   Epoch 1 | batch 250/2775 | opt_step ~125 | loss=2.6103 | lr=6.01e-06
+2026-05-07 10:36:46,701 [INFO]   Epoch 1 | batch 300/2775 | opt_step ~150 | loss=2.5626 | lr=7.21e-06
+2026-05-07 10:01:38,675 [INFO]   Epoch 1 | batch 50/2775 | opt_step ~25 | loss=2.7946 | lr=1.20e-06
+2026-05-07 10:08:39,866 [INFO]   Epoch 1 | batch 100/2775 | opt_step ~50 | loss=2.7703 | lr=2.40e-06
+2026-05-07 10:15:41,622 [INFO]   Epoch 1 | batch 150/2775 | opt_step ~75 | loss=2.7411 | lr=3.61e-06
+2026-05-07 10:22:43,754 [INFO]   Epoch 1 | batch 200/2775 | opt_step ~100 | loss=2.6728 | lr=4.81e-06
+2026-05-07 10:29:45,573 [INFO]   Epoch 1 | batch 250/2775 | opt_step ~125 | loss=2.6103 | lr=6.01e-06
+2026-05-07 10:36:46,701 [INFO]   Epoch 1 | batch 300/2775 | opt_step ~150 | loss=2.5626 | lr=7.21e-06
+2026-05-07 10:43:48,653 [INFO]   Epoch 1 | batch 350/2775 | opt_step ~175 | loss=2.5154 | lr=8.41e-06
+2026-05-07 10:50:50,432 [INFO]   Epoch 1 | batch 400/2775 | opt_step ~200 | loss=2.4763 | lr=9.62e-06
+2026-05-07 10:57:51,645 [INFO]   Epoch 1 | batch 450/2775 | opt_step ~225 | loss=2.4490 | lr=1.08e-05
+2026-05-07 11:04:53,448 [INFO]   Epoch 1 | batch 500/2775 | opt_step ~250 | loss=2.4214 | lr=1.20e-05
+2026-05-07 11:11:54,817 [INFO]   Epoch 1 | batch 550/2775 | opt_step ~275 | loss=2.4014 | lr=1.32e-05
+2026-05-07 11:18:56,028 [INFO]   Epoch 1 | batch 600/2775 | opt_step ~300 | loss=2.3864 | lr=1.44e-05
+2026-05-07 11:25:57,747 [INFO]   Epoch 1 | batch 650/2775 | opt_step ~325 | loss=2.3681 | lr=1.56e-05
+2026-05-07 10:50:50,432 [INFO]   Epoch 1 | batch 400/2775 | opt_step ~200 | loss=2.4763 | lr=9.62e-06
+2026-05-07 10:57:51,645 [INFO]   Epoch 1 | batch 450/2775 | opt_step ~225 | loss=2.4490 | lr=1.08e-05
+2026-05-07 11:04:53,448 [INFO]   Epoch 1 | batch 500/2775 | opt_step ~250 | loss=2.4214 | lr=1.20e-05
+2026-05-07 11:11:54,817 [INFO]   Epoch 1 | batch 550/2775 | opt_step ~275 | loss=2.4014 | lr=1.32e-05
+2026-05-07 11:18:56,028 [INFO]   Epoch 1 | batch 600/2775 | opt_step ~300 | loss=2.3864 | lr=1.44e-05
+2026-05-07 11:25:57,747 [INFO]   Epoch 1 | batch 650/2775 | opt_step ~325 | loss=2.3681 | lr=1.56e-05
+2026-05-07 10:50:50,432 [INFO]   Epoch 1 | batch 400/2775 | opt_step ~200 | loss=2.4763 | lr=9.62e-06
+2026-05-07 10:57:51,645 [INFO]   Epoch 1 | batch 450/2775 | opt_step ~225 | loss=2.4490 | lr=1.08e-05
+2026-05-07 11:04:53,448 [INFO]   Epoch 1 | batch 500/2775 | opt_step ~250 | loss=2.4214 | lr=1.20e-05
+2026-05-07 11:11:54,817 [INFO]   Epoch 1 | batch 550/2775 | opt_step ~275 | loss=2.4014 | lr=1.32e-05
+2026-05-07 11:18:56,028 [INFO]   Epoch 1 | batch 600/2775 | opt_step ~300 | loss=2.3864 | lr=1.44e-05
+2026-05-07 11:25:57,747 [INFO]   Epoch 1 | batch 650/2775 | opt_step ~325 | loss=2.3681 | lr=1.56e-05
+2026-05-07 11:32:59,262 [INFO]   Epoch 1 | batch 700/2775 | opt_step ~350 | loss=2.3661 | lr=1.68e-05
+2026-05-07 10:57:51,645 [INFO]   Epoch 1 | batch 450/2775 | opt_step ~225 | loss=2.4490 | lr=1.08e-05
+2026-05-07 11:04:53,448 [INFO]   Epoch 1 | batch 500/2775 | opt_step ~250 | loss=2.4214 | lr=1.20e-05
+2026-05-07 11:11:54,817 [INFO]   Epoch 1 | batch 550/2775 | opt_step ~275 | loss=2.4014 | lr=1.32e-05
+2026-05-07 11:18:56,028 [INFO]   Epoch 1 | batch 600/2775 | opt_step ~300 | loss=2.3864 | lr=1.44e-05
+2026-05-07 11:25:57,747 [INFO]   Epoch 1 | batch 650/2775 | opt_step ~325 | loss=2.3681 | lr=1.56e-05
+2026-05-07 11:32:59,262 [INFO]   Epoch 1 | batch 700/2775 | opt_step ~350 | loss=2.3661 | lr=1.68e-05
+2026-05-07 10:57:51,645 [INFO]   Epoch 1 | batch 450/2775 | opt_step ~225 | loss=2.4490 | lr=1.08e-05
+2026-05-07 11:04:53,448 [INFO]   Epoch 1 | batch 500/2775 | opt_step ~250 | loss=2.4214 | lr=1.20e-05
+2026-05-07 11:11:54,817 [INFO]   Epoch 1 | batch 550/2775 | opt_step ~275 | loss=2.4014 | lr=1.32e-05
+2026-05-07 11:18:56,028 [INFO]   Epoch 1 | batch 600/2775 | opt_step ~300 | loss=2.3864 | lr=1.44e-05
+2026-05-07 11:25:57,747 [INFO]   Epoch 1 | batch 650/2775 | opt_step ~325 | loss=2.3681 | lr=1.56e-05
+2026-05-07 11:32:59,262 [INFO]   Epoch 1 | batch 700/2775 | opt_step ~350 | loss=2.3661 | lr=1.68e-05
+2026-05-07 11:40:00,736 [INFO]   Epoch 1 | batch 750/2775 | opt_step ~375 | loss=2.3597 | lr=1.80e-05
+2026-05-07 11:47:02,335 [INFO]   Epoch 1 | batch 800/2775 | opt_step ~400 | loss=2.3450 | lr=1.92e-05
+2026-05-07 11:54:04,021 [INFO]   Epoch 1 | batch 850/2775 | opt_step ~425 | loss=2.3362 | lr=2.00e-05
+2026-05-07 12:01:05,025 [INFO]   Epoch 1 | batch 900/2775 | opt_step ~450 | loss=2.3228 | lr=1.99e-05
+2026-05-07 12:08:05,987 [INFO]   Epoch 1 | batch 950/2775 | opt_step ~475 | loss=2.3215 | lr=1.98e-05
+2026-05-07 12:15:07,201 [INFO]   Epoch 1 | batch 1000/2775 | opt_step ~500 | loss=2.3126 | lr=1.97e-05
+2026-05-07 12:22:08,506 [INFO]   Epoch 1 | batch 1050/2775 | opt_step ~525 | loss=2.3031 | lr=1.97e-05
+2026-05-07 12:29:10,021 [INFO]   Epoch 1 | batch 1100/2775 | opt_step ~550 | loss=2.2935 | lr=1.96e-05
+2026-05-07 12:36:11,527 [INFO]   Epoch 1 | batch 1150/2775 | opt_step ~575 | loss=2.2809 | lr=1.95e-05
+2026-05-07 12:43:13,062 [INFO]   Epoch 1 | batch 1200/2775 | opt_step ~600 | loss=2.2732 | lr=1.94e-05
+1.98e-05
+2026-05-07 12:15:07,201 [INFO]   Epoch 1 | batch 1000/2775 | opt_step ~500 | loss=2.3126 | lr=1.97e-05
+2026-05-07 12:22:08,506 [INFO]   Epoch 1 | batch 1050/2775 | opt_step ~525 | loss=2.3031 | lr=1.97e-05
+2026-05-07 12:29:10,021 [INFO]   Epoch 1 | batch 1100/2775 | opt_step ~550 | loss=2.2935 | lr=1.96e-05
+2026-05-07 12:36:11,527 [INFO]   Epoch 1 | batch 1150/2775 | opt_step ~575 | loss=2.2809 | lr=1.95e-05
+2026-05-07 12:43:13,062 [INFO]   Epoch 1 | batch 1200/2775 | opt_step ~600 | loss=2.2732 | lr=1.94e-05
+2026-05-07 12:50:14,440 [INFO]   Epoch 1 | batch 1250/2775 | opt_step ~625 | loss=2.2672 | lr=1.94e-05
+2026-05-07 12:57:15,610 [INFO]   Epoch 1 | batch 1300/2775 | opt_step ~650 | loss=2.2662 | lr=1.93e-05
+2026-05-07 13:04:17,407 [INFO]   Epoch 1 | batch 1350/2775 | opt_step ~675 | loss=2.2604 | lr=1.92e-05
+2026-05-07 13:11:18,572 [INFO]   Epoch 1 | batch 1400/2775 | opt_step ~700 | loss=2.2570 | lr=1.91e-05
+2026-05-07 13:18:19,437 [INFO]   Epoch 1 | batch 1450/2775 | opt_step ~725 | loss=2.2513 | lr=1.91e-05
+2026-05-07 13:25:20,379 [INFO]   Epoch 1 | batch 1500/2775 | opt_step ~750 | loss=2.2497 | lr=1.90e-05
+2026-05-07 13:32:20,908 [INFO]   Epoch 1 | batch 1550/2775 | opt_step ~775 | loss=2.2456 | lr=1.89e-05
+2026-05-07 13:39:22,098 [INFO]   Epoch 1 | batch 1600/2775 | opt_step ~800 | loss=2.2403 | lr=1.88e-05
+2026-05-07 13:46:23,461 [INFO]   Epoch 1 | batch 1650/2775 | opt_step ~825 | loss=2.2365 | lr=1.87e-05
+2026-05-07 13:53:24,476 [INFO]   Epoch 1 | batch 1700/2775 | opt_step ~850 | loss=2.2309 | lr=1.87e-05
+2026-05-07 14:00:25,822 [INFO]   Epoch 1 | batch 1750/2775 | opt_step ~875 | loss=2.2262 | lr=1.86e-05
+2026-05-07 14:07:26,203 [INFO]   Epoch 1 | batch 1800/2775 | opt_step ~900 | loss=2.2221 | lr=1.85e-05
+2026-05-07 14:14:27,053 [INFO]   Epoch 1 | batch 1850/2775 | opt_step ~925 | loss=2.2168 | lr=1.84e-05
+2026-05-07 14:21:27,670 [INFO]   Epoch 1 | batch 1900/2775 | opt_step ~950 | loss=2.2157 | lr=1.84e-05
+2026-05-07 13:46:23,461 [INFO]   Epoch 1 | batch 1650/2775 | opt_step ~825 | loss=2.2365 | lr=1.87e-05
+2026-05-07 13:53:24,476 [INFO]   Epoch 1 | batch 1700/2775 | opt_step ~850 | loss=2.2309 | lr=1.87e-05
+2026-05-07 14:00:25,822 [INFO]   Epoch 1 | batch 1750/2775 | opt_step ~875 | loss=2.2262 | lr=1.86e-05
+2026-05-07 14:07:26,203 [INFO]   Epoch 1 | batch 1800/2775 | opt_step ~900 | loss=2.2221 | lr=1.85e-05
+2026-05-07 14:14:27,053 [INFO]   Epoch 1 | batch 1850/2775 | opt_step ~925 | loss=2.2168 | lr=1.84e-05
+2026-05-07 14:21:27,670 [INFO]   Epoch 1 | batch 1900/2775 | opt_step ~950 | loss=2.2157 | lr=1.84e-05
+2026-05-07 14:28:29,022 [INFO]   Epoch 1 | batch 1950/2775 | opt_step ~975 | loss=2.2113 | lr=1.83e-05
+2026-05-07 14:35:29,663 [INFO]   Epoch 1 | batch 2000/2775 | opt_step ~1000 | loss=2.2068 | lr=1.82e-05
+2026-05-07 14:42:31,039 [INFO]   Epoch 1 | batch 2050/2775 | opt_step ~1025 | loss=2.2053 | lr=1.81e-05
+2026-05-07 14:49:31,717 [INFO]   Epoch 1 | batch 2100/2775 | opt_step ~1050 | loss=2.2043 | lr=1.81e-05
+2026-05-07 14:56:32,013 [INFO]   Epoch 1 | batch 2150/2775 | opt_step ~1075 | loss=2.2025 | lr=1.80e-05
+2026-05-07 15:03:32,679 [INFO]   Epoch 1 | batch 2200/2775 | opt_step ~1100 | loss=2.2004 | lr=1.79e-05
+2026-05-07 15:10:33,246 [INFO]   Epoch 1 | batch 2250/2775 | opt_step ~1125 | loss=2.1976 | lr=1.78e-05
+2026-05-07 15:17:34,169 [INFO]   Epoch 1 | batch 2300/2775 | opt_step ~1150 | loss=2.1962 | lr=1.77e-05
+ Epoch 1 | batch 2250/2775 | opt_step ~1125 | loss=2.1976 | lr=1.78e-05
+2026-05-07 15:17:34,169 [INFO]   Epoch 1 | batch 2300/2775 | opt_step ~1150 | loss=2.1962 | lr=1.77e-05
+2026-05-07 14:00:25,822 [INFO]   Epoch 1 | batch 1750/2775 | opt_step ~875 | loss=2.2262 | lr=1.86e-05
+2026-05-07 14:07:26,203 [INFO]   Epoch 1 | batch 1800/2775 | opt_step ~900 | loss=2.2221 | lr=1.85e-05
+2026-05-07 14:14:27,053 [INFO]   Epoch 1 | batch 1850/2775 | opt_step ~925 | loss=2.2168 | lr=1.84e-05
+2026-05-07 14:21:27,670 [INFO]   Epoch 1 | batch 1900/2775 | opt_step ~950 | loss=2.2157 | lr=1.84e-05
+2026-05-07 14:28:29,022 [INFO]   Epoch 1 | batch 1950/2775 | opt_step ~975 | loss=2.2113 | lr=1.83e-05
+2026-05-07 14:35:29,663 [INFO]   Epoch 1 | batch 2000/2775 | opt_step ~1000 | loss=2.2068 | lr=1.82e-05
+2026-05-07 14:42:31,039 [INFO]   Epoch 1 | batch 2050/2775 | opt_step ~1025 | loss=2.2053 | lr=1.81e-05
+2026-05-07 14:49:31,717 [INFO]   Epoch 1 | batch 2100/2775 | opt_step ~1050 | loss=2.2043 | lr=1.81e-05
+2026-05-07 14:56:32,013 [INFO]   Epoch 1 | batch 2150/2775 | opt_step ~1075 | loss=2.2025 | lr=1.80e-05
+2026-05-07 15:03:32,679 [INFO]   Epoch 1 | batch 2200/2775 | opt_step ~1100 | loss=2.2004 | lr=1.79e-05
+2026-05-07 15:10:33,246 [INFO]   Epoch 1 | batch 2250/2775 | opt_step ~1125 | loss=2.1976 | lr=1.78e-05
+2026-05-07 15:17:34,169 [INFO]   Epoch 1 | batch 2300/2775 | opt_step ~1150 | loss=2.1962 | lr=1.77e-05
+2026-05-07 15:24:34,875 [INFO]   Epoch 1 | batch 2350/2775 | opt_step ~1175 | loss=2.1932 | lr=1.77e-05
+2026-05-07 15:31:35,773 [INFO]   Epoch 1 | batch 2400/2775 | opt_step ~1200 | loss=2.1918 | lr=1.76e-05
+2026-05-07 15:38:37,134 [INFO]   Epoch 1 | batch 2450/2775 | opt_step ~1225 | loss=2.1900 | lr=1.75e-05
+2026-05-07 15:45:37,910 [INFO]   Epoch 1 | batch 2500/2775 | opt_step ~1250 | loss=2.1883 | lr=1.74e-05
+2026-05-07 15:52:39,184 [INFO]   Epoch 1 | batch 2550/2775 | opt_step ~1275 | loss=2.1875 | lr=1.74e-05
+2026-05-07 15:59:40,508 [INFO]   Epoch 1 | batch 2600/2775 | opt_step ~1300 | loss=2.1853 | lr=1.73e-05
+2026-05-07 16:06:42,355 [INFO]   Epoch 1 | batch 2650/2775 | opt_step ~1325 | loss=2.1824 | lr=1.72e-05
+2026-05-07 16:13:44,316 [INFO]   Epoch 1 | batch 2700/2775 | opt_step ~1350 | loss=2.1800 | lr=1.71e-05
+2026-05-07 16:20:46,183 [INFO]   Epoch 1 | batch 2750/2775 | opt_step ~1375 | loss=2.1780 | lr=1.71e-05
+
