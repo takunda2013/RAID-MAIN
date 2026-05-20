@@ -1,0 +1,48 @@
+https://www.kaggle.com/datasets/thedrcat/daigt-v2-train-dataset?resource=download 
+
+persuade_corpus                       25996
+chat_gpt_moth                          2421
+llama2_chat                            2421
+mistral7binstruct_v2                   2421
+mistral7binstruct_v1                   2421
+original_moth                          2421
+train_essays                           1378
+llama_70b_v1                           1172
+falcon_180b_v1                         1055
+darragh_claude_v7                      1000
+darragh_claude_v6                      1000
+radek_500                               500
+NousResearch/Llama-2-7b-chat-hf         400
+mistralai/Mistral-7B-Instruct-v0.1      400
+cohere-command                          350
+palm-text-bison1                        349
+radekgpt4                               200
+
+
+TOTAL:   44868
+
+MODEL FAMILIES:::::
+
+1 Mistral Family
+2 Meta (Llama Family)
+3 Google (PaLM Family)
+4 OpenAI
+5 TII (Falcon)
+6 Anthropic (Claude)
+7 Cohere
+
+
+================================================================================================
+
+
+
+https://www.kaggle.com/datasets/sunilthite/llm-detect-ai-generated-text-dataset
+
+
+Dataset contains more than 28,000 essay written by student and AI generated.
+
+Features :
+
+text : Which contains essay text
+generated : This is target label . 0 - Human Written Essay , 1 - AI Generated Essay
+
