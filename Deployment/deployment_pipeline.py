@@ -90,7 +90,7 @@ class DeploymentConfig:
     lime_num_features: int = 12
     # GPT-2-large statistical feature extraction is expensive for every LIME
     # perturbation. Keep the live default small; raise it for slower audits.
-    lime_num_samples: int = 8
+    lime_num_samples: int = 20
     min_words: int = DEFAULT_MIN_WORDS
     device: str = "auto"
 
@@ -390,7 +390,7 @@ def build_annotated_spans(text: str, word_weights: dict[str, float]) -> list[dic
 
 def build_summary(auditor_prob_ai: float, warnings: list[str]) -> str:
     auditor_pct = round(auditor_prob_ai * 100)
-    summary = f"The calibrated statistical auditor estimates {auditor_pct}% AI probability."
+    summary = f"The Originality Engine estimates {auditor_pct}% AI probability."
     if warnings:
         summary += " Review warning: " + " ".join(warnings)
     return summary
@@ -532,7 +532,7 @@ def parse_args() -> argparse.Namespace:
     source.add_argument("--essay-file", type=Path, help="UTF-8 text file containing the essay")
     parser.add_argument("--json", action="store_true", help="Print the full JSON result")
     parser.add_argument("--no-lime", action="store_true", help="Skip LIME and only classify")
-    parser.add_argument("--lime-samples", type=int, default=8)
+    parser.add_argument("--lime-samples", type=int, default=20)
     parser.add_argument("--lime-features", type=int, default=12)
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     return parser.parse_args()

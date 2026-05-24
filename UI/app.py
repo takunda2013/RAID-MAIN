@@ -1751,7 +1751,7 @@ def render_title() -> None:
                     </div>
                 </div>
                 <div class="status-panel">
-                    {status_markup}
+                    {status_markup} 
                 </div>
             </div>
             """

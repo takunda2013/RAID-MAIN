@@ -1,0 +1,112 @@
+1	Results
+
+This chapter presents the XGBoost probability-audit findings based on `XGBoost Classifier/probability_audit_fixes/results.md` (with setup context from `README.md` in the same directory). The objective is to report classification performance, probability calibration quality, and confidence-saturation behavior across feature views and model families.
+
+1.1	Introduction:
+
+This chapter addresses the following evaluation questions:
+
+- RQ1: How strong is the XGBoost detector on the final test split?
+- RQ2: Are the very high confidence scores (e.g., ~99%) caused by model error/leakage, or by highly separable features?
+- RQ3: Which model variant gives the best probability behavior for auditing and LIME-style explanation?
+
+The audit compared five experiment families:
+
+- `xgb_full` (all 1034 features: 1024 semantic + 10 statistical)
+- `xgb_semantic` (semantic-only, 1024 features)
+- `xgb_statistical` (statistical-only, 10 features)
+- `logistic_full` (auditor baseline on full features)
+- `logistic_statistical` (auditor baseline on statistical-only features)
+
+Each family was evaluated under three probability sources:
+
+- `raw`
+- `sigmoid` calibration
+- `isotonic` calibration
+
+The primary metrics reported are accuracy, AUC, Brier score, ECE (Expected Calibration Error), and `middle_10_90` (fraction of predictions with `0.10 < prob_ai < 0.90`, used here as a practical saturation indicator).
+
+1.2	Presentation of Findings:
+
+1.2.1	Feature-View Setup and Audit Meaning
+
+The feature views used in the audit were:
+
+- Full: 1034 columns
+- Semantic-only: 1024 columns
+- Statistical-only: 10 columns
+
+This ablation design directly tests whether near-perfect detection is coming from semantic embeddings, statistical features, or both.
+
+1.2.2	XGBoost Results by Feature View
+
+| Model / Probability Source | Accuracy | AUC | Brier | ECE | middle_10_90 |
+|---|---:|---:|---:|---:|---:|
+| xgb_full/raw | 0.9995 | 1.0000 | 0.0012 | 0.0223 | 0.0097 |
+| xgb_full/sigmoid | 0.9995 | 1.0000 | 0.0005 | 0.0003 | 0.0002 |
+| xgb_full/isotonic | 0.9997 | 0.9996 | 0.0004 | 0.0004 | 0.0002 |
+| xgb_semantic/raw | 0.9997 | 1.0000 | 0.0011 | 0.0224 | 0.0043 |
+| xgb_semantic/sigmoid | 0.9997 | 1.0000 | 0.0003 | 0.0002 | 0.0003 |
+| xgb_semantic/isotonic | 0.9997 | 0.9997 | 0.0003 | 0.0003 | 0.0002 |
+| xgb_statistical/raw | 0.5780 | 0.8623 | 0.2317 | 0.2708 | 1.0000 |
+| xgb_statistical/sigmoid | 0.8216 | 0.8623 | 0.1331 | 0.0657 | 0.6223 |
+| xgb_statistical/isotonic | 0.8216 | 0.8638 | 0.1262 | 0.0122 | 0.4952 |
+
+Key interpretation:
+
+- `xgb_semantic` is essentially equal to `xgb_full` on core discrimination metrics.
+- Therefore, semantic embeddings are the dominant source of performance.
+- Statistical-only XGBoost is much weaker for raw thresholded classification but still shows useful ranking capacity (AUC ~0.86).
+
+1.2.3	Logistic Auditor Baselines
+
+| Model / Probability Source | Accuracy | AUC | Brier | ECE | middle_10_90 |
+|---|---:|---:|---:|---:|---:|
+| logistic_full/raw | 0.9989 | 0.9997 | 0.0013 | 0.0018 | 0.0062 |
+| logistic_full/sigmoid | 0.9987 | 0.9997 | 0.0012 | 0.0015 | 0.0046 |
+| logistic_full/isotonic | 0.9987 | 0.9993 | 0.0011 | 0.0008 | 0.0018 |
+| logistic_statistical/raw | 0.8461 | 0.9539 | 0.1162 | 0.1522 | 0.3660 |
+| logistic_statistical/sigmoid | 0.8929 | 0.9539 | 0.0770 | 0.0354 | 0.3240 |
+| logistic_statistical/isotonic | 0.8949 | 0.9527 | 0.0755 | 0.0151 | 0.3105 |
+
+Key interpretation:
+
+- Full-feature logistic models are also highly accurate and confident, reinforcing that confidence saturation is not unique to XGBoost.
+- `logistic_statistical/isotonic` offers the most balanced auditor-facing profile: reasonably high accuracy (~89.5%), strong AUC (~0.953), and much larger mid-probability mass (31.05%) than semantic-heavy models.
+
+1.2.4	Calibration Effects and Confidence Saturation
+
+A) Full/semantic high-performance models
+
+- Calibration greatly improves Brier and ECE, but pushes probabilities to be even more extreme.
+- For example, `xgb_full`: raw `middle_10_90=0.0097` (0.97%) drops to `0.0002` (0.02%) after calibration.
+- This is desirable for probability correctness on this test set, but reduces probability movement for perturbation-based explainers (e.g., LIME).
+
+B) Statistical-only models
+
+- Calibration provides substantial gains in practical quality.
+- `xgb_statistical` raw → isotonic:
+  - Accuracy: `0.5780 -> 0.8216` (+24.36 points)
+  - Brier: `0.2317 -> 0.1262` (45.53% reduction)
+  - ECE: `0.2708 -> 0.0122` (95.49% reduction)
+- `logistic_statistical` raw → isotonic:
+  - Accuracy: `0.8461 -> 0.8949` (+4.88 points)
+  - Brier: `0.1162 -> 0.0755` (35.03% reduction)
+  - ECE: `0.1522 -> 0.0151` (90.08% reduction)
+
+These results show calibration is most transformative when the base model is not already saturated by highly separable semantic features.
+
+1.2.5	Root-Cause Findings (Directly Addressing the Confidence Issue)
+
+The audit evidence supports the following:
+
+1. The 99% confidence behavior is primarily due to very separable semantic embedding space (RoBERTa features), not only due to duplicate data or threshold artifacts.
+2. Adding the 10 statistical features to semantic features provides little extra gain for detection accuracy in this run.
+3. If the goal is maximum detection performance, semantic/full XGBoost remains the best choice.
+4. If the goal is probability movement for audit explanations, a statistical-only calibrated model is more suitable.
+
+1.3	Conclusion:
+
+The probability-audit experiment confirms that the XGBoost detector is extremely strong when semantic embeddings are included, with near-perfect accuracy and AUC across `xgb_full` and `xgb_semantic`. However, this same separability causes probability saturation (few predictions in the mid-confidence range), especially after calibration. Thus, calibration improves probability correctness but can reduce explainability utility for LIME.
+
+In summary, the results support a dual-model strategy: keep semantic/full XGBoost for production detection, and use a calibrated statistical auditor model—particularly `logistic_statistical/isotonic`—for explanation workflows requiring meaningful probability movement under text perturbation.

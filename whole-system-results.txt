@@ -1,0 +1,137 @@
+1	Results
+
+This chapter reports whole-system results for the deployed Human-vs-AI essay detector, integrating evidence across semantic encoding, classification, auditing, and live pipeline execution.
+
+Primary evidence sources:
+
+- `Contrastive-Learning/evaluation results.txt`
+- `XGBoost Classifier/probability_audit_fixes/outputs/metrics_summary.csv`
+- `XGBoost Classifier/probability_audit_fixes/outputs/run_config.json`
+- `Deployment/test_essay_performance.md`
+- `Deployment/test_essay_performance.json`
+- `Deployment/deployment_pipeline.py` and `Deployment/README.md`
+
+1.1	Introduction:
+
+The whole-system evaluation addresses:
+
+- RQ1: Does the combined semantic + classifier stack maintain very high detection performance on held-out data?
+- RQ2: Does the deployed dual-model design (production + auditor) support both accurate decisions and interpretable auditing?
+- RQ3: What are the practical response-time characteristics of the live end-to-end pipeline?
+
+System design under evaluation:
+
+- Production decision model: `xgb_semantic_isotonic` (binary final label)
+- Auditor model for explanations: `logistic_statistical_isotonic` (LIME probability movement)
+
+1.2	Presentation of Findings:
+
+1.2.1	Data Used for XGBoost Training and Final Evaluation
+
+The deployed classifier selection came from the probability-audit experiment that used these split roles (`run_config.json`):
+
+| Role | Split Name | Feature File | Label File | Rows |
+|---|---|---|---|---:|
+| Training | `unseen` | `unseen_concatenated.npy` | `unseen_labels.npy` | 44,867 |
+| Calibration | `val` | `val_concatenated.npy` | `val_labels.npy` | 6,083 |
+| Final test | `test` | `test_concatenated.npy` | `test_labels.npy` | 6,087 |
+
+All three matrices were generated in `Concatenation-engine/data/concatenated/` and combine:
+
+- 1024-dimensional semantic embeddings from Contrastive-Learning, and
+- 10 statistical features from Statistical-Calculator.
+
+This makes the full feature vector for XGBoost `1034` dimensions.
+
+1.2.2	Upstream Semantic Encoder Effectiveness (Contrastive Stage)
+
+Held-out probe evaluation from `Contrastive-Learning/evaluation results.txt`:
+
+- Accuracy: 0.9993
+- AUC: 1.0000
+- Confusion matrix: `[[1610, 2], [2, 4474]]`
+- Human precision/recall/F1: 0.9988 / 0.9988 / 0.9988
+- AI precision/recall/F1: 0.9996 / 0.9996 / 0.9996
+- Original AI recall: 0.9982
+- Paraphrased AI recall: 1.0000
+
+Interpretation:
+
+- The embedding space is highly separable and robust to paraphrasing in held-out evaluation.
+- This upstream behavior explains the very strong downstream production classifier performance.
+
+1.2.3	Final Production Classifier Performance (System Decision Core)
+
+Using final-test results from `metrics_summary.csv` (`run_config.json`: final test n=6,087):
+
+| Production Candidate | Features | Accuracy | AUC | Brier | ECE | TN | FP | FN | TP |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| xgb_semantic/isotonic | 1024 | 0.999671 | 0.999690 | 0.000294 | 0.000317 | 1611 | 1 | 1 | 4474 |
+| xgb_full/isotonic | 1034 | 0.999671 | 0.999578 | 0.000355 | 0.000395 | 1611 | 1 | 1 | 4474 |
+
+Key finding:
+
+- `xgb_semantic/isotonic` matches full-model accuracy while slightly improving calibration metrics, confirming semantic features dominate final performance.
+
+1.2.4	Auditor Path Performance (Explanation Layer)
+
+Selected auditor model (`logistic_statistical/isotonic`) on final test:
+
+- Accuracy: 0.894858
+- AUC: 0.952734
+- Brier: 0.075458
+- ECE: 0.015056
+- Confusion matrix: TN=1266, FP=346, FN=294, TP=4181
+- Human recall: 78.54%
+- AI recall: 93.43%
+- `middle_10_90`: 0.3105 (31.05% of predictions in mid-confidence range)
+
+Interpretation:
+
+- Auditor performance is lower than production (expected), but probabilities are much less saturated and therefore better suited for perturbation-based explanation (LIME).
+
+1.2.5	Integrated Deployment Run (Single-Essay End-to-End)
+
+From `test_essay_performance.json` on a 571-word essay:
+
+Prediction outputs:
+
+- Production label: Human-written (`label_id=0`)
+- Production `P(AI)`: 0.000000
+- Production `P(Human)`: 1.000000
+- Auditor `P(AI)`: 0.108108
+- Auditor `P(Human)`: 0.891892
+
+This production-auditor difference (`+0.1081` AI probability on auditor) demonstrates the intended dual-role behavior: strict final decision plus softer audit signal.
+
+Latency profile (manual staged path):
+
+- Estimated total: 10,025.007 ms (~10.025 s)
+- Semantic embedding extraction: 4,441.55 ms (~4.442 s; 44.3% of total)
+- Statistical feature extraction: 2,286.754 ms (~2.287 s; 22.81%)
+- LIME explanation: 3,232.463 ms (~3.232 s; 32.24%)
+- Production inference: 57.938 ms (~0.058 s)
+- Auditor inference: 6.259 ms (~0.006 s)
+
+Observed API timing:
+
+- `analyze_text` with LIME: 3,690.051 ms (~3.690 s)
+
+Note: the staged manual total and single API call timing are measured on different call patterns and are not directly additive equivalents.
+
+1.2.6	Interpretability Output Quality
+
+LIME configuration in this run:
+
+- Samples: 8
+- Features shown: 12 tokens
+
+Top weighted tokens were mostly Human-signal (e.g., `better`, `was`, `pain`), with a smaller AI-signal contribution (e.g., `One`).
+
+This confirms the full pipeline returns both a hard decision and token-level audit evidence, aligned with the deployment objective.
+
+1.3	Conclusion:
+
+The whole system demonstrates very strong end-to-end effectiveness. The semantic production path achieves near-perfect held-out detection (accuracy ~99.97% on final test with extremely low FP/FN), while the statistical auditor path provides less-saturated probabilities that support explanation workflows.
+
+In deployment, the system successfully delivered a final classification, calibrated auditor score, token-level explanation, and complete feature outputs in practical interactive latency. The main runtime bottlenecks are semantic embedding extraction and LIME/statistical processing, not classifier inference. Overall, the dual-model architecture is validated for both high-accuracy detection and audit-focused interpretability.
