@@ -388,9 +388,52 @@ def build_annotated_spans(text: str, word_weights: dict[str, float]) -> list[dic
     return spans
 
 
+def _educator_risk_band(auditor_prob_ai: float) -> str:
+    if auditor_prob_ai >= 0.90:
+        return "very_high_ai"
+    if auditor_prob_ai >= 0.75:
+        return "high_ai"
+    if auditor_prob_ai >= 0.55:
+        return "leaning_ai"
+    if auditor_prob_ai >= 0.45:
+        return "mixed"
+    if auditor_prob_ai >= 0.25:
+        return "leaning_human"
+    return "high_human"
+
+
 def build_summary(auditor_prob_ai: float, warnings: list[str]) -> str:
     auditor_pct = round(auditor_prob_ai * 100)
-    summary = f"The Originality Engine estimates {auditor_pct}% AI probability."
+    band = _educator_risk_band(auditor_prob_ai)
+
+    summary_templates = {
+        "very_high_ai": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "This is a strong AI-likelihood signal and should be reviewed as high priority."
+        ),
+        "high_ai": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "The writing pattern is substantially aligned with AI-generated text."
+        ),
+        "leaning_ai": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "The evidence leans toward AI-style writing; use assignment context to confirm."
+        ),
+        "mixed": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "The evidence is mixed, so this should be treated as inconclusive without additional review."
+        ),
+        "leaning_human": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "The writing appears more consistent with human authorship, with minor AI-like cues."
+        ),
+        "high_human": (
+            f"The Originality Engine estimates {auditor_pct}% AI probability. "
+            "The writing appears strongly consistent with human authorship."
+        ),
+    }
+
+    summary = summary_templates[band]
     if warnings:
         summary += " Review warning: " + " ".join(warnings)
     return summary
@@ -398,6 +441,8 @@ def build_summary(auditor_prob_ai: float, warnings: list[str]) -> str:
 
 def build_explanation(auditor_prob_ai: float, word_weights: dict[str, float]) -> str:
     auditor_pct = round(auditor_prob_ai * 100)
+    band = _educator_risk_band(auditor_prob_ai)
+
     if word_weights:
         strongest = sorted(word_weights.items(), key=lambda item: abs(item[1]), reverse=True)[:3]
         strongest_text = ", ".join(
@@ -407,10 +452,20 @@ def build_explanation(auditor_prob_ai: float, word_weights: dict[str, float]) ->
     else:
         strongest_text = "No stable LIME tokens were returned."
 
+    educator_next_step = {
+        "very_high_ai": "Recommended educator action: verify with draft history, in-class writing samples, and citation/originality checks.",
+        "high_ai": "Recommended educator action: perform targeted review and compare with prior student writing style.",
+        "leaning_ai": "Recommended educator action: review rubric alignment and request clarification or drafting evidence if needed.",
+        "mixed": "Recommended educator action: treat as uncertain and rely on broader evidence rather than score alone.",
+        "leaning_human": "Recommended educator action: low-risk flag; keep normal review procedures.",
+        "high_human": "Recommended educator action: no elevated AI concern indicated by this analysis.",
+    }[band]
+
     return (
         "The word highlights come from the calibrated statistical auditor model. "
         f"Auditor estimate: {auditor_pct}% AI probability. "
-        f"Strongest audit tokens: {strongest_text}."
+        f"Strongest audit tokens: {strongest_text}. "
+        f"{educator_next_step}"
     )
 
 

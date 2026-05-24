@@ -328,9 +328,9 @@ def process_uploaded_documents_live(conn, *, user_id: int, overlay_placeholder=N
             animate_bar=True,
         )
 
-        report_path = demo_ui.user_report_dir(user_id) / f"report_document_{document.id}.pdf"
+        report_path = demo_ui.user_report_dir(user_id) / f"report_document_{document.id}.html"
         report_path.write_bytes(
-            demo_ui.make_demo_pdf(
+            demo_ui.make_styled_report_html(
                 ui_result,
                 source_text,
                 title=f"AI Detector Report - {document.original_filename}",
@@ -453,12 +453,12 @@ def render_live_sidebar() -> None:
             st.caption("Generate a report for the current result, then download.")
         else:
             st.download_button(
-                "Download Report (.pdf)",
-                data=demo_ui.make_demo_pdf(
+                "Download Styled Report (.html)",
+                data=demo_ui.make_styled_report_html(
                     result, source_text, title="AI Essay Detector Report"
                 ),
-                file_name="ai_detector_report.pdf",
-                mime="application/pdf",
+                file_name="ai_detector_report.html",
+                mime="text/html",
                 use_container_width=True,
                 key="download_report",
             )
@@ -780,4 +780,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

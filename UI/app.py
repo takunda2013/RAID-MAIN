@@ -1489,6 +1489,136 @@ def escape_pdf_text(value: str) -> str:
     return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
+def _annotated_text_html(annotated_words: tuple[tuple[str, str], ...], fallback_text: str) -> str:
+    if not annotated_words:
+        preview = html.escape((fallback_text or "No text supplied.")[:5000]).replace("\n", "<br>")
+        return f"<div class='plain-text'>{preview}</div>"
+
+    spans: list[str] = []
+    for token, polarity in annotated_words:
+        p = str(polarity).strip().lower()
+        css_class = "token-neutral"
+        if p == "ai":
+            css_class = "token-ai"
+        elif p == "human":
+            css_class = "token-human"
+        spans.append(f"<span class='token {css_class}'>{html.escape(str(token))}</span>")
+
+    return " ".join(spans)
+
+
+def make_styled_report_html(
+    result: DemoResult,
+    source_text: str,
+    title: str = "AI Essay Detector Report",
+) -> bytes:
+    generated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    label_class = "ai" if result.label.lower().startswith("ai") else "human"
+
+    token_rows = "\n".join(
+        (
+            f"<tr><td>{rank}</td><td>{html.escape(token)}</td><td>{html.escape(weight)}</td>"
+            f"<td><span class='signal {'signal-ai' if str(signal).lower() == 'ai' else 'signal-human'}'>{html.escape(signal)}</span></td></tr>"
+        )
+        for rank, token, weight, signal in result.tokens
+    ) or "<tr><td colspan='4'>No LIME token weights available.</td></tr>"
+
+    metric_rows = "\n".join(
+        f"<tr><td>{html.escape(name)}</td><td>{html.escape(value)}</td><td>{html.escape(note)}</td></tr>"
+        for name, value, note in result.metrics
+    ) or "<tr><td colspan='3'>No metric rows available.</td></tr>"
+
+    highlighted_text = _annotated_text_html(result.annotated_words, source_text)
+    preview = html.escape((source_text or "No text supplied.")[:1200]).replace("\n", "<br>")
+
+    html_doc = f"""<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>{html.escape(title)}</title>
+  <style>
+    body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f6f8fb; color: #1f2937; }}
+    .page {{ max-width: 980px; margin: 24px auto; padding: 0 16px; }}
+    .card {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px; box-shadow: 0 4px 18px rgba(15,23,42,0.06); margin-bottom: 14px; }}
+    .header h1 {{ margin: 0; font-size: 24px; }}
+    .subtle {{ color: #6b7280; font-size: 13px; }}
+    .grid {{ display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 12px; }}
+    .kpi {{ border-radius: 10px; padding: 12px; border: 1px solid #e5e7eb; background: #fafafa; }}
+    .kpi .name {{ font-size: 12px; color: #6b7280; margin-bottom: 4px; }}
+    .kpi .val {{ font-size: 20px; font-weight: 700; }}
+    .badge {{ display: inline-block; padding: 5px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; }}
+    .badge.ai {{ background: #fee2e2; color: #991b1b; }}
+    .badge.human {{ background: #dcfce7; color: #166534; }}
+    h2 {{ margin: 0 0 10px 0; font-size: 18px; }}
+    .insight {{ line-height: 1.55; }}
+    .token {{ display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 8px; border: 1px solid #e5e7eb; }}
+    .token-ai {{ background: #ffe8e8; border-color: #fecaca; color: #991b1b; }}
+    .token-human {{ background: #e8fff0; border-color: #bbf7d0; color: #166534; }}
+    .token-neutral {{ background: #f8fafc; color: #374151; }}
+    table {{ width: 100%; border-collapse: collapse; }}
+    th, td {{ padding: 9px 8px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 13px; }}
+    th {{ background: #f8fafc; color: #334155; }}
+    .signal-ai {{ color: #991b1b; font-weight: 700; }}
+    .signal-human {{ color: #166534; font-weight: 700; }}
+    .plain-text {{ white-space: normal; line-height: 1.65; }}
+  </style>
+</head>
+<body>
+  <div class='page'>
+    <div class='card header'>
+      <h1>{html.escape(title)}</h1>
+      <div class='subtle'>Generated: {generated}</div>
+      <div style='margin-top:10px'><span class='badge {label_class}'>{html.escape(result.label)}</span></div>
+      <div class='grid'>
+        <div class='kpi'><div class='name'>Confidence</div><div class='val'>{result.confidence}%</div></div>
+        <div class='kpi'><div class='name'>AI Probability</div><div class='val'>{result.ai_probability}%</div></div>
+        <div class='kpi'><div class='name'>Scenario</div><div class='val' style='font-size:16px'>{html.escape(result.name)}</div></div>
+      </div>
+    </div>
+
+    <div class='card'>
+      <h2>Summary</h2>
+      <div class='insight'>{html.escape(result.summary)}</div>
+    </div>
+
+    <div class='card'>
+      <h2>LIME Justification</h2>
+      <div class='subtle' style='margin-bottom:8px'>Highlighted words indicate local evidence used by the auditor model (green = Human signal, red = AI signal).</div>
+      <div class='insight'>{highlighted_text}</div>
+      <div style='margin-top:14px'>
+        <table>
+          <thead><tr><th>Rank</th><th>Token</th><th>Weight</th><th>Signal</th></tr></thead>
+          <tbody>{token_rows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class='card'>
+      <h2>Model Explanation</h2>
+      <div class='insight'>{html.escape(result.explanation)}</div>
+    </div>
+
+    <div class='card'>
+      <h2>Supporting Metrics</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Value</th><th>Interpretation</th></tr></thead>
+        <tbody>{metric_rows}</tbody>
+      </table>
+    </div>
+
+    <div class='card'>
+      <h2>Submitted Text Preview</h2>
+      <div class='plain-text'>{preview or 'No text supplied.'}</div>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+    return html_doc.encode("utf-8")
+
+
 def make_demo_pdf(result: DemoResult, source_text: str, title: str = "AI Essay Detector Demo Report") -> bytes:
     lines = [
         title,
@@ -1597,12 +1727,12 @@ def process_uploaded_documents(conn, *, user_id: int) -> int:
         document = row_to_document(row)
         source_text = read_text_file(document.stored_path)
         result = demo_result_for_document(document.id, document.demo_scenario)
-        report_path = user_report_dir(user_id) / f"report_document_{document.id}.pdf"
+        report_path = user_report_dir(user_id) / f"report_document_{document.id}.html"
         report_path.write_bytes(
-            make_demo_pdf(
+            make_styled_report_html(
                 result,
                 source_text,
-                title=f"AI Detector Demo Report - {document.original_filename}",
+                title=f"AI Detector Report - {document.original_filename}",
             )
         )
         mark_document_processed(
@@ -1698,10 +1828,10 @@ def render_sidebar() -> None:
                 st.caption("Generate a report for the current result, then download.")
             else:
                 st.download_button(
-                    "Download Report (.pdf)",
-                    data=make_demo_pdf(result, source_text),
-                    file_name="ai_detector_report.pdf",
-                    mime="application/pdf",
+                    "Download Styled Report (.html)",
+                    data=make_styled_report_html(result, source_text),
+                    file_name="ai_detector_report.html",
+                    mime="text/html",
                     use_container_width=True,
                     key="download_report",
                 )
@@ -1751,7 +1881,7 @@ def render_title() -> None:
                     </div>
                 </div>
                 <div class="status-panel">
-                    {status_markup} 
+                    {status_markup}
                 </div>
             </div>
             """
@@ -2111,11 +2241,13 @@ def render_document_viewer(conn, *, current_user, document_id: int, key_prefix: 
             st.markdown(f"**Processed:** {html.escape(document.processed_at or '—')}")
 
         if document.report_path and Path(document.report_path).exists():
+            report_file = Path(document.report_path)
+            report_mime = "text/html" if report_file.suffix.lower() in {".html", ".htm"} else "application/pdf"
             st.download_button(
                 "Download Stored Report",
-                data=Path(document.report_path).read_bytes(),
-                file_name=Path(document.report_path).name,
-                mime="application/pdf",
+                data=report_file.read_bytes(),
+                file_name=report_file.name,
+                mime=report_mime,
                 use_container_width=True,
                 key=f"{key_prefix}_download_{document.id}",
             )
