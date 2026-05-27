@@ -438,7 +438,7 @@ def render_live_sidebar() -> None:
 
         if not result:
             st.button(
-                "Download Report (.pdf)",
+                "Download Report (.html)",
                 disabled=True,
                 use_container_width=True,
                 key="download_report_disabled",
@@ -739,7 +739,7 @@ def render_live_explanation(result: demo_ui.DemoResult | None) -> None:
     )
     st.markdown('<div class="box">', unsafe_allow_html=True)
     demo_ui.render_token_table(result.tokens)
-    demo_ui.render_metric_table(result.metrics)
+    # demo_ui.render_metric_table(result.metrics)
     st.markdown("</div>", unsafe_allow_html=True)
 
 

@@ -39,7 +39,7 @@ MODEL FAMILIES:::::
 https://www.kaggle.com/datasets/sunilthite/llm-detect-ai-generated-text-dataset
 
 
-Dataset contains more than 28,000 essay written by student and AI generated.
+Dataset contains more than 29,147 essay written by student and AI generated.
 
 Features :
 

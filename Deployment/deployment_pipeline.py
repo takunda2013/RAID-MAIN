@@ -56,7 +56,7 @@ AUDIT_OUTPUTS_DIR = (
     / "outputs"
 )
 
-DEFAULT_PRODUCTION_MODEL_PATH = AUDIT_OUTPUTS_DIR / "xgb_semantic_isotonic_calibrated_model.pkl"
+DEFAULT_PRODUCTION_MODEL_PATH = AUDIT_OUTPUTS_DIR / "xgb_semantic_sigmoid_calibrated_model.pkl"
 DEFAULT_AUDITOR_MODEL_PATH = AUDIT_OUTPUTS_DIR / "logistic_statistical_isotonic_calibrated_model.pkl"
 DEFAULT_FEATURE_NAMES_PATH = PROJECT_ROOT / "Concatenation-engine" / "data" / "concatenated" / "unseen_feature_names.txt"
 DEFAULT_MIN_WORDS = 100
@@ -91,6 +91,17 @@ class DeploymentConfig:
     # GPT-2-large statistical feature extraction is expensive for every LIME
     # perturbation. Keep the live default small; raise it for slower audits.
     lime_num_samples: int = 20
+    # Suppress LIME when auditor confidence reaches this threshold.
+    lime_suppression_confidence_percent: int = 99
+    # LIME display controls.
+    # We currently expose all raw LIME tokens in UI/report when LIME runs.
+    lime_max_display_tokens: int = 8
+    lime_min_abs_weight: float = 0.02
+    lime_include_counterevidence: bool = False
+    lime_mixed_counterevidence_low_percent: int = 35
+    lime_mixed_counterevidence_high_percent: int = 65
+    # Prevent over-highlighting repeated words in long essays.
+    lime_max_occurrences_per_token: int = 1
     min_words: int = DEFAULT_MIN_WORDS
     device: str = "auto"
 
@@ -113,6 +124,7 @@ class AnalysisResult:
     statistical_features: dict[str, float]
     top_tokens: list[dict[str, Any]]
     annotated_spans: list[dict[str, Any]]
+    lime_diagnostics: dict[str, Any]
     warnings: list[str]
     lime_html: str
 
@@ -341,6 +353,151 @@ def clean_lookup_token(token: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]", "", token).lower()
 
 
+def _filter_word_weights_for_display(
+    word_weights: dict[str, float],
+    *,
+    auditor_prob_ai: float,
+    max_tokens: int,
+    min_abs_weight: float,
+    include_counterevidence: bool,
+) -> dict[str, float]:
+    if not word_weights:
+        return {}
+
+    max_tokens = max(1, int(max_tokens))
+    min_abs_weight = max(0.0, float(min_abs_weight))
+    predicted_ai = auditor_prob_ai >= 0.5
+
+    items = [(str(token), float(weight)) for token, weight in word_weights.items()]
+    items = [(token, weight) for token, weight in items if abs(weight) >= min_abs_weight]
+
+    if not include_counterevidence:
+        if predicted_ai:
+            items = [(token, weight) for token, weight in items if weight > 0]
+        else:
+            items = [(token, weight) for token, weight in items if weight < 0]
+    else:
+        # In mixed mode, try to show both sides when available.
+        pos = sorted([(token, weight) for token, weight in items if weight > 0], key=lambda x: abs(x[1]), reverse=True)
+        neg = sorted([(token, weight) for token, weight in items if weight < 0], key=lambda x: abs(x[1]), reverse=True)
+
+        # If thresholding removed one side entirely, recover one token from the
+        # raw LIME output so mixed cases can still show both perspectives.
+        raw_all = sorted(
+            [(str(token), float(weight)) for token, weight in word_weights.items()],
+            key=lambda item: abs(item[1]),
+            reverse=True,
+        )
+        if not pos:
+            raw_pos = [(token, weight) for token, weight in raw_all if weight > 0]
+            if raw_pos:
+                pos = raw_pos[:1]
+        if not neg:
+            raw_neg = [(token, weight) for token, weight in raw_all if weight < 0]
+            if raw_neg:
+                neg = raw_neg[:1]
+
+        each = max(1, max_tokens // 2)
+        selected = pos[:each] + neg[:each]
+        remainder = pos[each:] + neg[each:]
+        remainder = sorted(remainder, key=lambda x: abs(x[1]), reverse=True)
+        selected = selected + remainder[: max(0, max_tokens - len(selected))]
+        items = selected
+
+    if not items:
+        fallback = sorted(
+            [(str(token), float(weight)) for token, weight in word_weights.items()],
+            key=lambda item: abs(item[1]),
+            reverse=True,
+        )
+        if not include_counterevidence:
+            if predicted_ai:
+                fallback = [(token, weight) for token, weight in fallback if weight > 0]
+            else:
+                fallback = [(token, weight) for token, weight in fallback if weight < 0]
+        items = fallback[:max_tokens]
+
+    filtered: list[tuple[str, float]] = []
+    seen: set[str] = set()
+    for token, weight in sorted(items, key=lambda item: abs(item[1]), reverse=True):
+        norm = clean_lookup_token(token) or token.strip().lower()
+        if not norm or len(norm) <= 2:
+            continue
+        if norm in seen:
+            continue
+        seen.add(norm)
+        filtered.append((token, weight))
+        if len(filtered) >= max_tokens:
+            break
+
+    # Final fallback: if filtering became too strict, return strongest tokens
+    # from raw LIME output so educator still sees evidence when available.
+    if not filtered and word_weights:
+        for token, weight in sorted(
+            [(str(t), float(w)) for t, w in word_weights.items()],
+            key=lambda item: abs(item[1]),
+            reverse=True,
+        ):
+            norm = clean_lookup_token(token) or token.strip().lower()
+            if not norm:
+                continue
+            if norm in seen:
+                continue
+            seen.add(norm)
+            filtered.append((token, weight))
+            if len(filtered) >= max_tokens:
+                break
+
+    # Ensure both sides are shown in counterevidence mode when raw LIME has
+    # both positive and negative evidence available.
+    if include_counterevidence and filtered:
+        has_pos = any(weight > 0 for _, weight in filtered)
+        has_neg = any(weight < 0 for _, weight in filtered)
+
+        if not (has_pos and has_neg):
+            need_positive = not has_pos
+
+            candidates = []
+            for token, weight in sorted(
+                [(str(t), float(w)) for t, w in word_weights.items()],
+                key=lambda item: abs(item[1]),
+                reverse=True,
+            ):
+                if need_positive and weight <= 0:
+                    continue
+                if (not need_positive) and weight >= 0:
+                    continue
+                norm = clean_lookup_token(token) or token.strip().lower()
+                if not norm or len(norm) <= 2:
+                    continue
+                if norm in seen:
+                    continue
+                candidates.append((token, weight, norm))
+
+            if candidates:
+                token, weight, norm = candidates[0]
+                # Keep table length stable: if full, replace weakest token from
+                # the already-present side.
+                if len(filtered) >= max_tokens:
+                    same_side_idxs = [
+                        idx for idx, (_, w) in enumerate(filtered)
+                        if (w > 0) == (not need_positive)
+                    ]
+                    if same_side_idxs:
+                        weakest_idx = min(same_side_idxs, key=lambda idx: abs(filtered[idx][1]))
+                    else:
+                        weakest_idx = min(range(len(filtered)), key=lambda idx: abs(filtered[idx][1]))
+                    removed_token, _ = filtered.pop(weakest_idx)
+                    removed_norm = clean_lookup_token(removed_token) or removed_token.strip().lower()
+                    if removed_norm in seen:
+                        seen.remove(removed_norm)
+
+                seen.add(norm)
+                filtered.append((token, weight))
+
+    return {token: weight for token, weight in filtered}
+
+
 def build_top_tokens(word_weights: dict[str, float]) -> list[dict[str, Any]]:
     sorted_items = sorted(word_weights.items(), key=lambda item: abs(item[1]), reverse=True)
     rows = []
@@ -357,10 +514,17 @@ def build_top_tokens(word_weights: dict[str, float]) -> list[dict[str, Any]]:
     return rows
 
 
-def build_annotated_spans(text: str, word_weights: dict[str, float]) -> list[dict[str, Any]]:
+def build_annotated_spans(
+    text: str,
+    word_weights: dict[str, float],
+    *,
+    max_occurrences_per_token: int = 2,
+) -> list[dict[str, Any]]:
     direct = {str(key): float(value) for key, value in word_weights.items()}
     cleaned = {clean_lookup_token(str(key)): float(value) for key, value in word_weights.items()}
     spans = []
+    max_occurrences_per_token = max(1, int(max_occurrences_per_token))
+    counts: dict[str, int] = {}
 
     for token in re.findall(r"\S+", text):
         key = token.strip()
@@ -370,6 +534,14 @@ def build_annotated_spans(text: str, word_weights: dict[str, float]) -> list[dic
             weight = direct.get(key.lower())
         if weight is None and clean_key:
             weight = cleaned.get(clean_key)
+
+        if weight is not None:
+            count_key = clean_key or key.lower()
+            seen = counts.get(count_key, 0)
+            if seen >= max_occurrences_per_token:
+                weight = None
+            else:
+                counts[count_key] = seen + 1
 
         if weight is None:
             polarity = "neutral"
@@ -413,19 +585,19 @@ def build_summary(auditor_prob_ai: float, warnings: list[str]) -> str:
         ),
         "high_ai": (
             f"The Originality Engine estimates {auditor_pct}% AI probability. "
-            "The writing pattern is substantially aligned with AI-generated text."
+            "The writing pattern closely matches AI-generated text and warrants closer review."
         ),
         "leaning_ai": (
             f"The Originality Engine estimates {auditor_pct}% AI probability. "
-            "The evidence leans toward AI-style writing; use assignment context to confirm."
+            "The writing shows some AI-like patterns; consider the assignment context before drawing conclusions."
         ),
         "mixed": (
             f"The Originality Engine estimates {auditor_pct}% AI probability. "
-            "The evidence is mixed, so this should be treated as inconclusive without additional review."
+            "The result is inconclusive — consider reviewing the submission directly or comparing with other work samples."
         ),
         "leaning_human": (
             f"The Originality Engine estimates {auditor_pct}% AI probability. "
-            "The writing appears more consistent with human authorship, with minor AI-like cues."
+            "The writing is generally consistent with human authorship, though the score is not definitive."
         ),
         "high_human": (
             f"The Originality Engine estimates {auditor_pct}% AI probability. "
@@ -508,27 +680,116 @@ def analyze_text(text: str, config: DeploymentConfig | None = None, *, include_l
     production_label_id, production_prob_human, production_prob_ai = predict_binary(production_model, semantic)
     _, auditor_prob_human, auditor_prob_ai = predict_binary(auditor_model, statistical)
 
-    word_weights: dict[str, float] = {}
-    lime_html = ""
-    if include_lime:
-        word_weights, lime_html = run_lime_audit(essay_text, config)
-
     label = LABEL_NAMES[production_label_id]
     confidence = max(production_prob_human, production_prob_ai)
+    confidence_percent = int(round(confidence * 100))
+
+    log.info(
+        "Production inference | model=xgb_semantic_sigmoid | label=%s (%d) | prob_ai=%.6f | prob_human=%.6f | confidence=%.6f (%d%%)",
+        label,
+        production_label_id,
+        production_prob_ai,
+        production_prob_human,
+        confidence,
+        confidence_percent,
+    )
+    log.info(
+        "Auditor inference    | model=logistic_statistical_isotonic | prob_ai=%.6f | prob_human=%.6f",
+        auditor_prob_ai,
+        auditor_prob_human,
+    )
+
+    # LIME suppression is based on auditor confidence, since LIME explains
+    # the auditor model path.
+    lime_suppression_pct = max(0, min(int(config.lime_suppression_confidence_percent), 100))
+    auditor_confidence_pct_exact = max(auditor_prob_human, auditor_prob_ai) * 100.0
+
+    raw_word_weights: dict[str, float] = {}
+    lime_html = ""
+    lime_allowed = include_lime and auditor_confidence_pct_exact < float(lime_suppression_pct)
+    if lime_allowed:
+        raw_word_weights, lime_html = run_lime_audit(essay_text, config)
+
+    if raw_word_weights:
+        raw_items = sorted(raw_word_weights.items(), key=lambda item: abs(float(item[1])), reverse=True)
+        raw_tokens_text = "; ".join(f"{token}={float(weight):+.4f}" for token, weight in raw_items)
+        log.info("LIME raw tokens      | %s", raw_tokens_text)
+    elif lime_allowed:
+        log.info("LIME raw tokens      | none returned by explainer")
+    elif include_lime:
+        log.info(
+            "LIME raw tokens      | skipped (auditor_confidence=%.4f%% >= suppression_threshold=%d%%)",
+            auditor_confidence_pct_exact,
+            lime_suppression_pct,
+        )
+
+    # Per request: display all raw LIME tokens when LIME runs.
+    include_counterevidence = lime_allowed
+
+    word_weights = {
+        str(token): float(weight)
+        for token, weight in raw_word_weights.items()
+        if np.isfinite(float(weight))
+    }
+
+    raw_ai_count = sum(1 for w in raw_word_weights.values() if float(w) > 0)
+    raw_human_count = sum(1 for w in raw_word_weights.values() if float(w) < 0)
+    displayed_ai_count = sum(1 for w in word_weights.values() if float(w) > 0)
+    displayed_human_count = sum(1 for w in word_weights.values() if float(w) < 0)
+
+    lime_diagnostics = {
+        "lime_enabled": bool(include_lime),
+        "lime_ran": bool(include_lime and auditor_confidence_pct_exact < float(lime_suppression_pct)),
+        "suppression_threshold_percent": int(lime_suppression_pct),
+        "auditor_confidence_percent": round(auditor_confidence_pct_exact, 4),
+        "counterevidence_mode": bool(include_counterevidence),
+        "raw_token_counts": {
+            "ai": int(raw_ai_count),
+            "human": int(raw_human_count),
+            "total": int(len(raw_word_weights)),
+        },
+        "displayed_token_counts": {
+            "ai": int(displayed_ai_count),
+            "human": int(displayed_human_count),
+            "total": int(len(word_weights)),
+        },
+    }
+
+    log.info(
+        "LIME diagnostics     | ran=%s | counterevidence=%s | raw(ai=%d,human=%d,total=%d) | displayed(ai=%d,human=%d,total=%d)",
+        lime_diagnostics["lime_ran"],
+        lime_diagnostics["counterevidence_mode"],
+        lime_diagnostics["raw_token_counts"]["ai"],
+        lime_diagnostics["raw_token_counts"]["human"],
+        lime_diagnostics["raw_token_counts"]["total"],
+        lime_diagnostics["displayed_token_counts"]["ai"],
+        lime_diagnostics["displayed_token_counts"]["human"],
+        lime_diagnostics["displayed_token_counts"]["total"],
+    )
+
+    summary_text = build_summary(auditor_prob_ai, warnings)
+    # Keep educator wording aligned with displayed token evidence.
+    has_ai_display_token = any(float(w) > 0 for w in word_weights.values())
+    if not has_ai_display_token:
+        summary_text = summary_text.replace(
+            "with minor AI-like cues.",
+            "without notable AI-like token cues in this explanation.",
+        )
+
     result = AnalysisResult(
         status="ok",
         label_id=production_label_id,
         label=label,
         confidence=confidence,
-        confidence_percent=int(round(confidence * 100)),
+        confidence_percent=confidence_percent,
         prob_ai=production_prob_ai,
         prob_human=production_prob_human,
         ai_probability_percent=int(round(production_prob_ai * 100)),
         word_count=word_count,
-        summary=build_summary(auditor_prob_ai, warnings),
+        summary=summary_text,
         explanation=build_explanation(auditor_prob_ai, word_weights),
         production={
-            "model": "xgb_semantic_isotonic",
+            "model": "xgb_semantic_sigmoid",
             "prob_ai": production_prob_ai,
             "prob_human": production_prob_human,
             "label_id": production_label_id,
@@ -542,7 +803,12 @@ def analyze_text(text: str, config: DeploymentConfig | None = None, *, include_l
         },
         statistical_features=statistical_dict,
         top_tokens=build_top_tokens(word_weights),
-        annotated_spans=build_annotated_spans(essay_text, word_weights),
+        annotated_spans=build_annotated_spans(
+            essay_text,
+            word_weights,
+            max_occurrences_per_token=config.lime_max_occurrences_per_token,
+        ),
+        lime_diagnostics=lime_diagnostics,
         warnings=warnings,
         lime_html=lime_html,
     )
@@ -589,6 +855,47 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-lime", action="store_true", help="Skip LIME and only classify")
     parser.add_argument("--lime-samples", type=int, default=20)
     parser.add_argument("--lime-features", type=int, default=12)
+    parser.add_argument(
+        "--lime-suppress-confidence-pct",
+        type=int,
+        default=99,
+        help="Skip LIME when auditor confidence percent is >= this value (default: 99).",
+    )
+    parser.add_argument(
+        "--lime-max-display-tokens",
+        type=int,
+        default=8,
+        help="Maximum LIME tokens to display in output (default: 8).",
+    )
+    parser.add_argument(
+        "--lime-min-abs-weight",
+        type=float,
+        default=0.02,
+        help="Minimum absolute token weight to display (default: 0.02).",
+    )
+    parser.add_argument(
+        "--lime-include-counterevidence",
+        action="store_true",
+        help="Always include opposite-side evidence tokens (disabled by default).",
+    )
+    parser.add_argument(
+        "--lime-mixed-low-pct",
+        type=int,
+        default=35,
+        help="Lower bound of mixed range where both sides are shown (default: 35).",
+    )
+    parser.add_argument(
+        "--lime-mixed-high-pct",
+        type=int,
+        default=65,
+        help="Upper bound of mixed range where both sides are shown (default: 65).",
+    )
+    parser.add_argument(
+        "--lime-max-occurrences-per-token",
+        type=int,
+        default=1,
+        help="Maximum highlighted occurrences per token in annotated text (default: 1).",
+    )
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     return parser.parse_args()
 
@@ -599,6 +906,13 @@ def main() -> int:
     config = DeploymentConfig(
         lime_num_samples=args.lime_samples,
         lime_num_features=args.lime_features,
+        lime_suppression_confidence_percent=args.lime_suppress_confidence_pct,
+        lime_max_display_tokens=args.lime_max_display_tokens,
+        lime_min_abs_weight=args.lime_min_abs_weight,
+        lime_include_counterevidence=args.lime_include_counterevidence,
+        lime_mixed_counterevidence_low_percent=args.lime_mixed_low_pct,
+        lime_mixed_counterevidence_high_percent=args.lime_mixed_high_pct,
+        lime_max_occurrences_per_token=args.lime_max_occurrences_per_token,
         device=args.device,
     )
     result = analyze_text(text, config=config, include_lime=not args.no_lime)

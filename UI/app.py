@@ -1812,7 +1812,7 @@ def render_sidebar() -> None:
 
         if not result:
             st.button(
-                "Download Report (.pdf)",
+                "Download Report (.html)",
                 disabled=True,
                 use_container_width=True,
                 key="download_report_disabled",
